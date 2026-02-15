@@ -11,7 +11,6 @@ import json
 from datetime import datetime
 from model_selector import ModelSelector
 from dataset_selector import DatasetSelector
-from hook_manager import HookManager
 
 # Setup logging
 logging.basicConfig(
