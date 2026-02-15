@@ -37,6 +37,9 @@ def main(args):
     set_seed(args.seed)
     results_dir = ensure_results_dir()
 
+    train_set, _ = DatasetSelector.get_dataset_shape(args.dataset)
+    input_shape = train_set[0][0].shape
+
     logger.info(f"Loading dataset: {args.dataset}")
     trainloader, testloader, num_classes = DatasetSelector.get_dataloaders(
         args.dataset,
@@ -48,5 +51,5 @@ def main(args):
 
     # Load model and dataset
     logger.info(f"Loading model: {args.model}")
-    model_cls, input_size = ModelSelector.get_model(args.model)
+    model_cls, input_size = ModelSelector.get_model(args.model, input_shape, num_classes)
     model = model_cls(num_classes=DatasetSelector.AVAILABLE_DATASETS[args.dataset][1])

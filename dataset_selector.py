@@ -158,10 +158,11 @@ class DatasetSelector:
 def main():
     # Example usage
     dataset_name = 'CIFAR10'
-    batch_size = 64
-    num_train_samples = 1000
-    num_test_samples = 200
 
-    train_set, num_classes = DatasetSelector.get_dataset(dataset_name, train=True, num_samples=num_train_samples)
+    train_set, num_classes = DatasetSelector.get_dataset(dataset_name, train=True)
     print(f"Loaded {dataset_name} train set with {len(train_set)} samples and {num_classes} classes")
     print(f"Example data shape: {train_set[0][0].shape}, label: {train_set[0][1]}")
+
+
+if __name__ == "__main__":
+    main()
