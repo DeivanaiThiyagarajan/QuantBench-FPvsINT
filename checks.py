@@ -4,6 +4,9 @@ import torch.nn.functional as F
 from typing import List, Optional
 import logging
 
+from dataset_selector import DatasetSelector
+from model_selector import ModelSelector
+
 class SimpleMLP(nn.Module):
     def __init__(self, input_size: int, hidden_sizes: List[int], num_classes: int,
                  dropout: float = 0.0, use_batch_norm: bool = False):
@@ -101,70 +104,21 @@ class SimpleConvNet(nn.Module):
         
         return x
 
-class ModelSelector:
-    
-    AVAILABLE_MODELS = {
-        'MLP': SimpleMLP,
-        'ConvNet': SimpleConvNet
-    }
-    
-    @staticmethod
-    def list_models() -> List[str]:
-        return list(ModelSelector.AVAILABLE_MODELS.keys())
-    
-    @staticmethod
-    def get_mlp(input_size: int, hidden_sizes: List[int], num_classes: int,
-                dropout: float = 0.0, use_batch_norm: bool = False) -> SimpleMLP:
-        return SimpleMLP(
-            input_size=input_size,
-            hidden_sizes=[128, 64, 32, 16],
-            num_classes=num_classes,
-            dropout=dropout,
-            use_batch_norm=use_batch_norm
-        )
-    
-    @staticmethod
-    def get_convnet(num_classes: int, input_channels: int = 3) -> SimpleConvNet:
-        return SimpleConvNet(
-            num_classes=num_classes,
-            input_channels=input_channels
-        )
-    @staticmethod
-    def get_model(model_type: str, input_shape: tuple, num_classes: int) -> nn.Module:
-        if model_type == 'MLP':
-            size = 1
-            for dim in input_shape:
-                size *= dim
-            return ModelSelector.get_mlp(input_size=size, num_classes=num_classes)
-        elif model_type == 'ConvNet':
-            return ModelSelector.get_convnet(num_classes=num_classes)
-        else:
-            available = ', '.join(ModelSelector.list_models())
-            raise ValueError(f"Model '{model_type}' not available. Choose from: {available}")
 
-if __name__ == '__main__':
-    print("Available Models:", ModelSelector.list_models())
-    
-    # Simple models
-    print("\n=== Simple Models ===")
-    mlp = ModelSelector.get_mlp(
-        input_size=3072,
-        hidden_sizes=[512, 256],
-        num_classes=10,
-        dropout=0.5,
-        use_batch_norm=True
+if __name__ == "__main__":
+    # Example usage
+    dataset_name = 'CIFAR10'
+
+    train_set, num_classes = DatasetSelector.get_dataset(dataset_name, train=True)
+    input_shape = train_set[0][0].shape
+
+    #logger.info(f"Loading dataset: {args.dataset}")
+    trainloader, valloader, testloader, num_classes = DatasetSelector.get_dataloaders(
+        dataset_name=dataset_name,
+        batch_size=32
     )
-    print("MLP created")
-    
-    convnet = ModelSelector.get_convnet(num_classes=10)
-    print("ConvNet created")
-    
-    # Test forward pass
-    print("\n=== Forward Pass Test ===")
-    x = torch.randn(4, 3, 32, 32)
-    
-    y_mlp = mlp(x.view(4, -1))
-    print(f"MLP output shape: {y_mlp.shape}")
-    
-    y_conv = convnet(x)
-    print(f"ConvNet output shape: {y_conv.shape}")
+    # Load model and dataset
+    #logger.info(f"Loading model: {args.model}")
+    model = ModelSelector.get_model('SimpleMLP', input_shape, num_classes)
+
+    print(model)

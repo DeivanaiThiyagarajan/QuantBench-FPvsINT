@@ -6,6 +6,7 @@ import numpy as np
 import logging
 from typing import Tuple, Optional
 from pathlib import Path
+from sklearn.model_selection import train_test_split
 
 logger = logging.getLogger(__name__)
 
@@ -126,6 +127,8 @@ class DatasetSelector:
         trainset, num_classes = DatasetSelector.get_dataset(
             dataset_name, train=True, num_samples=num_train_samples, data_dir=data_dir
         )
+
+        trainset, valset = train_test_split(trainset, test_size=0.1, random_state=42)
         
         testset, _ = DatasetSelector.get_dataset(
             dataset_name, train=False, num_samples=num_test_samples, data_dir=data_dir
@@ -138,6 +141,14 @@ class DatasetSelector:
             num_workers=num_workers,
             pin_memory=True
         )
+
+        valloader = DataLoader(
+            valset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=True
+        )
         
         testloader = DataLoader(
             testset,
@@ -146,13 +157,16 @@ class DatasetSelector:
             num_workers=num_workers,
             pin_memory=True
         )
+
+
         
         logger.info(f"Created dataloaders for {dataset_name}")
         logger.info(f"  Train: {len(trainloader)} batches of size {batch_size}")
+        logger.info(f"  Val: {len(valloader)} batches of size {batch_size}")
         logger.info(f"  Test: {len(testloader)} batches of size {batch_size}")
         logger.info(f"  Classes: {num_classes}")
         
-        return trainloader, testloader, num_classes
+        return trainloader, valloader, testloader, num_classes
 
 
 def main():
